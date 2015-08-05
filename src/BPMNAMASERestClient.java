@@ -54,13 +54,12 @@ public class BPMNAMASERestClient extends HttpServlet {
 	 	 * calling specific service
 	 	 */
     	String processID = "avico-module1-v2";		    
-		String content = service.path("process-file").path(processID).get(String.class);
 		
 		/*
 		 * Writing text to DOM
 		 */
 		PrintWriter domOut = response.getWriter();
-	    domOut.println( "not a lot going on here really ha" );
+	    domOut.println( "" );
 		
 	    /*
 	     * Checking for and creating BPMNData folder
@@ -72,14 +71,25 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    }
 
 	    /*
-	     * 
+	     * Write AMASE response data to a new file if it exists
 	     */
-	    File file = new File(bpmnFolderName + "/" + processID + ".bpmn");
-	    file.createNewFile();
-	    FileWriter bpmnFileOut = new FileWriter(file);
-		bpmnFileOut.write(content, 0, content.length());
-		bpmnFileOut.flush();
-		bpmnFileOut.close();
+	    File bpmnFile = new File(bpmnFolderName + "/" + processID + ".bpmn");
+	    if(!bpmnFile.exists()){
+	    	
+	    	/*
+	    	 * Retrieve data from AMASE engine
+	    	 */
+	    	String content = service.path("process-file").path(processID).get(String.class);
+	    	
+	    	/*
+	    	 * Write data to file
+	    	 */
+		    bpmnFile.createNewFile();
+		    FileWriter bpmnFileOut = new FileWriter(bpmnFile);
+			bpmnFileOut.write(content, 0, content.length());
+			bpmnFileOut.flush();
+			bpmnFileOut.close();
+	    }
 		
 	}
 
