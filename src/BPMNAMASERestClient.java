@@ -44,16 +44,33 @@ public class BPMNAMASERestClient extends HttpServlet {
 					    
     	String processID = "avico-module1-v2";		    
 	    
-	    checkForAndCreateNewDirectory("/BPMNData" );
+    	String bpmnRelativeDirectoryPath = "/BPMNData";
+	    checkForAndCreateNewDirectory(bpmnRelativeDirectoryPath);
 
 	    /*
 	     * Write AMASE response data to a new file if it exists
 	     */
-	    String absoluteFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
+	    String absoluteFilePath = getServletContext().getRealPath(bpmnRelativeDirectoryPath + "/" + processID + ".bpmn");
 	    File bpmnFile = new File(absoluteFilePath);
 	    if(!bpmnFile.exists()){
 	    	createNewFile(bpmnFile, retrieveAMASEData(processID));
 	    }
+	    
+	    /*
+	     * Create graph data directory and parse JBPM file into JSON file
+	     */
+	    checkForAndCreateNewDirectory("/GraphData");
+	    
+	    BPMNXMLtoJSONParser parser = new BPMNXMLtoJSONParser();
+	    String XMLFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
+	    String JSONFilePath = getServletContext().getRealPath("/GraphData/" + processID + ".js");
+	    try {
+			parser.parseBPMNFile(XMLFilePath, JSONFilePath);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	    
+	    
 		
 	}
 
