@@ -8,6 +8,7 @@ import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -64,16 +65,19 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    /*
 	     * Checking for and creating BPMNData folder
 	     */
-	    String bpmnFolderName = "BPMNData";
-	    Path bpmnFolderPath = FileSystems.getDefault().getPath(bpmnFolderName) ;
-	    if(Files.notExists( bpmnFolderPath )){
-	    	(new File(bpmnFolderName)).mkdirs();
+	    String relativeBPMNFolderPath = "/BPMNData";
+	    String absoluteBPMNFolderPath = getServletContext().getRealPath(relativeBPMNFolderPath); 
+	    if(Files.notExists( Paths.get(absoluteBPMNFolderPath) )){
+	    	(new File(absoluteBPMNFolderPath)).mkdirs();
 	    }
+	    
+	    System.out.println(relativeBPMNFolderPath);
+	    System.out.println(absoluteBPMNFolderPath);
 
 	    /*
 	     * Write AMASE response data to a new file if it exists
 	     */
-	    File bpmnFile = new File(bpmnFolderName + "/" + processID + ".bpmn");
+	    File bpmnFile = new File(absoluteBPMNFolderPath + "/" + processID + ".bpmn");
 	    if(!bpmnFile.exists()){
 	    	
 	    	/*
