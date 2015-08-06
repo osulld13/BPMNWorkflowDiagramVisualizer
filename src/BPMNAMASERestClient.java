@@ -50,8 +50,7 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    /*
 	     * Write AMASE response data to a new file if it exists
 	     */
-	    String absoluteFilePath = getServletContext().getRealPath(bpmnRelativeDirectoryPath + "/" + processID + ".bpmn");
-	    File bpmnFile = new File(absoluteFilePath);
+	    File bpmnFile = new File(getServletContext().getRealPath(bpmnRelativeDirectoryPath + "/" + processID + ".bpmn"));
 	    if(!bpmnFile.exists()){
 	    	createNewFile(bpmnFile, retrieveAMASEData(processID));
 	    }
@@ -59,19 +58,20 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    /*
 	     * Create graph data directory and parse JBPM file into JSON file
 	     */
-	    checkForAndCreateNewDirectory("/GraphData");
+	    String jsonDirectoryPath = "/GraphData";
+	    checkForAndCreateNewDirectory(jsonDirectoryPath);
 	    
-	    BPMNXMLtoJSONParser parser = new BPMNXMLtoJSONParser();
-	    String XMLFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
-	    String JSONFilePath = getServletContext().getRealPath("/GraphData/" + processID + ".js");
-	    try {
-			parser.parseBPMNFile(XMLFilePath, JSONFilePath);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	    
-	    
-		
+	    File jsonFile = new File(getServletContext().getRealPath(jsonDirectoryPath + "/" + processID + ".js"));
+	    if(!jsonFile.exists()){
+	    	BPMNXMLtoJSONParser parser = new BPMNXMLtoJSONParser();
+		    String XMLFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
+		    String JSONFilePath = getServletContext().getRealPath("/GraphData/" + processID + ".js");
+		    try {
+				parser.parseBPMNFile(XMLFilePath, JSONFilePath);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	    }	    
 	}
 
 	/**

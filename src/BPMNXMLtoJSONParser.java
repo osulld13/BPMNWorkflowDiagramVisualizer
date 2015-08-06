@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.*;
-import javax.servlet.GenericServlet;
-
 import org.drools.KnowledgeBase;
 import org.drools.builder.KnowledgeBuilder;
 import org.drools.builder.KnowledgeBuilderError;
@@ -56,9 +53,7 @@ public class BPMNXMLtoJSONParser {
 		//String absoluteFolderPath = getServletContext().getRealPath(relativeFolderPath);
 		
 		//Only one of these can be included
-		String processFile = XMLFilePath;
-		//Resource processFile = getBpmnFile(XMLFilePath);
-		
+		String processFile = XMLFilePath;		
 		
 		//FileWriter out = new FileWriter("diagram_data/graphData.js");
 		FileWriter out = new FileWriter(JSONFilePath);
@@ -491,7 +486,6 @@ public class BPMNXMLtoJSONParser {
 	 */
 	private static KnowledgeBase readKnowledgeBase(String file) throws Exception {
 		KnowledgeBuilder kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
-		System.out.println(file);
 		kbuilder.add(ResourceFactory.newFileResource(file), ResourceType.BPMN2);
 		if ( kbuilder.hasErrors() ) {
 		    for(KnowledgeBuilderError e: kbuilder.getErrors()){
@@ -503,23 +497,6 @@ public class BPMNXMLtoJSONParser {
 		    	System.out.println();
 		    }
 		 }
-		assertFalse( kbuilder.hasErrors() );
-		return kbuilder.newKnowledgeBase();
-	}
-	
-	private static KnowledgeBase readKnowledgeBase(Resource file) throws Exception {
-		KnowledgeBuilder kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
-		/*kbuilder.add(file, ResourceType.BPMN2);
-		if ( kbuilder.hasErrors() ) {
-		    for(KnowledgeBuilderError e: kbuilder.getErrors()){
-		    	System.out.println();
-		    	System.out.println("Lines: " + e.getLines());
-		    	System.out.println("Message: " + e.getMessage());
-		    	System.out.println("Resource: " + e.getResource());
-		    	System.out.println("Severity: " + e.getSeverity());
-		    	System.out.println();
-		    }
-		}*/
 		assertFalse( kbuilder.hasErrors() );
 		return kbuilder.newKnowledgeBase();
 	}
@@ -575,14 +552,6 @@ public class BPMNXMLtoJSONParser {
 					System.out.write(x);
 				
 				in.close();
-	}
-	
-	public static Resource getBpmnFile(String filePath) throws IOException{
-		//getServletContext().getRealPath
-		//File bpmnFile = new File("./src/main/resources/" + bpmnFileName);
-		File bpmnFile = new File(filePath);
-		Resource processFile = ResourceFactory.newFileResource( bpmnFile);
-		return processFile;
 	}
 	
 }
