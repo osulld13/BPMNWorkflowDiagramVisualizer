@@ -41,58 +41,18 @@ public class BPMNAMASERestClient extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		/*
-		 * Connect to AMASE engine
-		 */
-		String SERVER_LOCATION = "sweep.scss.tcd.ie";
-		URI uri = UriBuilder.fromUri("http://"+SERVER_LOCATION+"/amase.services").build();
-		ClientConfig config = new DefaultClientConfig();
-		Client client = Client.create(config);
-		WebResource service = client.resource( uri );
-			    
-		/*
-	 	 * calling specific service
-	 	 */
+					    
     	String processID = "avico-module1-v2";		    
-		
-		/*
-		 * Writing text to DOM
-		 */
-		PrintWriter domOut = response.getWriter();
-	    domOut.println( "" );
-		
-	    /*
-	     * Checking for and creating BPMNData folder
-	     */
-	    String relativeBPMNFolderPath = "/BPMNData";
-	    String absoluteBPMNFolderPath = getServletContext().getRealPath(relativeBPMNFolderPath); 
-	    if(Files.notExists( Paths.get(absoluteBPMNFolderPath) )){
-	    	(new File(absoluteBPMNFolderPath)).mkdirs();
-	    }
 	    
-	    System.out.println(relativeBPMNFolderPath);
-	    System.out.println(absoluteBPMNFolderPath);
+	    checkForAndCreateNewDirectory("/BPMNData" );
 
 	    /*
 	     * Write AMASE response data to a new file if it exists
 	     */
-	    File bpmnFile = new File(absoluteBPMNFolderPath + "/" + processID + ".bpmn");
+	    String absoluteFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
+	    File bpmnFile = new File(absoluteFilePath);
 	    if(!bpmnFile.exists()){
-	    	
-	    	/*
-	    	 * Retrieve data from AMASE engine
-	    	 */
-	    	String content = service.path("process-file").path(processID).get(String.class);
-	    	
-	    	/*
-	    	 * Write data to file
-	    	 */
-		    bpmnFile.createNewFile();
-		    FileWriter bpmnFileOut = new FileWriter(bpmnFile);
-			bpmnFileOut.write(content, 0, content.length());
-			bpmnFileOut.flush();
-			bpmnFileOut.close();
+	    	createNewFile(bpmnFile, retrieveAMASEData(processID));
 	    }
 		
 	}
@@ -103,5 +63,36 @@ public class BPMNAMASERestClient extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 	}
-
+	
+	/*
+	 * Retrieve data from AMASE engine
+	 */
+	private String retrieveAMASEData(String processID){
+		String SERVER_LOCATION = "sweep.scss.tcd.ie";
+		URI uri = UriBuilder.fromUri("http://"+SERVER_LOCATION+"/amase.services").build();
+		ClientConfig config = new DefaultClientConfig();
+		Client client = Client.create(config);
+		WebResource service = client.resource( uri );
+    	return service.path("process-file").path(processID).get(String.class);		
+	}
+	
+	/*
+     * Checking for and creating folder
+     */
+	private void checkForAndCreateNewDirectory(String relativeFolderPath ){
+	    String absoluteFolderPath = getServletContext().getRealPath(relativeFolderPath); 
+	    if(Files.notExists( Paths.get(absoluteFolderPath) )){
+	    	(new File(absoluteFolderPath)).mkdirs();
+	    }
+	}
+	
+	private void createNewFile(File file, String content) throws IOException{
+	    file.createNewFile();
+	    FileWriter fileOut = new FileWriter(file);
+	    fileOut.write(content, 0, content.length());
+	    fileOut.flush();
+	    fileOut.close();
+	}
+	
+	
 }
