@@ -22,24 +22,15 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
-/**
- * Servlet implementation class BPMNAMASERestClient
- */
+
 @WebServlet("/BPMNAMASERestClient")
 public class BPMNAMASERestClient extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
     public BPMNAMASERestClient() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 					    
     	String processID = "avico-module1-v2";		    
@@ -47,39 +38,26 @@ public class BPMNAMASERestClient extends HttpServlet {
     	String bpmnRelativeDirectoryPath = "/BPMNData";
 	    checkForAndCreateNewDirectory(bpmnRelativeDirectoryPath);
 
-	    /*
-	     * Write AMASE response data to a new file if it exists
-	     */
+	    // Write AMASE response data to a new file if it exists	    
 	    File bpmnFile = new File(getServletContext().getRealPath(bpmnRelativeDirectoryPath + "/" + processID + ".bpmn"));
 	    if(!bpmnFile.exists()){
 	    	createNewFile(bpmnFile, retrieveAMASEData(processID));
 	    }
 	    
-	    /*
-	     * Create graph data directory and parse JBPM file into JSON file
-	     */
+	    
+	    //Create graph data directory and parse JBPM file into JSON file
 	    String jsonDirectoryPath = "/GraphData";
 	    checkForAndCreateNewDirectory(jsonDirectoryPath);
-	    
 	    File jsonFile = new File(getServletContext().getRealPath(jsonDirectoryPath + "/" + processID + ".js"));
 	    if(!jsonFile.exists()){
-	    	BPMNXMLtoJSONParser parser = new BPMNXMLtoJSONParser();
-		    String XMLFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
-		    String JSONFilePath = getServletContext().getRealPath("/GraphData/" + processID + ".js");
-		    try {
-				parser.parseBPMNFile(XMLFilePath, JSONFilePath);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-	    }	    
+	    	writeBPMNToJSON(processID);
+	    }
+	    
+	    response = writeToDom(response);
+	    
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-	}
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {}
 	
 	/*
 	 * Retrieve data from AMASE engine
@@ -111,5 +89,62 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    fileOut.close();
 	}
 	
+	private void writeBPMNToJSON(String processID){
+		BPMNXMLtoJSONParser parser = new BPMNXMLtoJSONParser();
+	    String XMLFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
+	    String JSONFilePath = getServletContext().getRealPath("/GraphData/" + processID + ".js");
+	    try {
+			parser.parseBPMNFile(XMLFilePath, JSONFilePath);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private HttpServletResponse writeToDom(HttpServletResponse response) throws IOException{
+		response.setContentType("text/html");
+	    PrintWriter out = response.getWriter();
+	    out.println(
+	    "<!DOCTYPE html>" +
+		"<html>" +
+		  "<head>" +
+		    "<link type=\"text/css\" rel=\"stylesheet\" href=\"CSS/reset.css\"/>" +
+		    "<link type=\"text/css\" rel=\"stylesheet\" href=\"CSS/stylesheet.css\"/>" +
+		  "</head>" +
+		  "<body>" +
+		    "<h1>BPMN Diagram Visualiser</h1>" +
+		    "<form action=\"\" method=\"GET\">" +
+		      "<input type=\"text\" name=\"activityName\">" +
+		      "<input type=\"submit\" name=\"submit\">" +
+		    "</form>" +
+		    "<div id=\"container\" >" +
+		      "<div id=\"myDiagramDiv\"></div>" +
+		
+		      "<div id=\"nav_bar\">" +
+		        "<div id=\"nav_bar_contents\">" +
+		          "<span id=\"nav_bar_label\">Navigation: </span>" +
+		          "<button class=\"nav_button\" id=\"prev_button\" onclick=\"prevNode();\"><< Prev</button>" +
+		          "<button class=\"nav_button\" id=\"start_button\" onclick=\"startCourse();\">Start</button>" +
+		          "<button class=\"nav_button\" id=\"next_button\" onclick=\"nextNode();\">Next >></button>" +
+		        "</div>" +
+		      "</div>" +
+		
+		      "<div id=\"dataDisplayContainer\">" +
+		        "<table id=\"dataDisplay\">" +
+		        "</table>" +
+		      "</div>" +
+		    "</div>" +
+		 
+		  "</body>" +
+		    "<script src=\"JS/lib/go-debug.js\"></script>" +
+		    "<script src=\"diagram_data/graphData.js\"></script>" +
+		    "<script src=\"JS/diagram_init.js\"></script>" +
+		    "<script src=\"JS/diagram_interaction.js\"></script>" +
+		    "<script src=\"JS/data_display.js\"></script>" +
+		    "<script src=\"JS/course_interaction.js\"></script>" +
+		    "<script src=\"JS/main.js\"></script>" +
+		"</html>"
+	    );
+	    return response;
+	}
 	
 }
