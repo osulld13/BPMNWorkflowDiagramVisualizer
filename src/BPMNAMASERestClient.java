@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.net.URI;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -33,7 +37,8 @@ public class BPMNAMASERestClient extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 					    
-    	String processID = "avico-module1-v2";		    
+		
+    	String processID = request.getParameter("process");		    
 	    
     	String bpmnRelativeDirectoryPath = "/BPMNData";
 	    checkForAndCreateNewDirectory(bpmnRelativeDirectoryPath);
@@ -50,14 +55,22 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    checkForAndCreateNewDirectory(jsonDirectoryPath);
 	    File jsonFile = new File(getServletContext().getRealPath(jsonDirectoryPath + "/" + processID + ".js"));
 	    if(!jsonFile.exists()){
-	    	writeBPMNToJSON(processID);
+	    	try {
+				writeBPMNToJSON(processID);
+				//Program sleeps in order to allow for writing of json file
+				Thread.sleep(5 * 1000);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	    }
 	    
-	    response = writeToDom(response);
+	    response = writeToDom(response, processID);
 	    
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {}
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
+	}
 	
 	/*
 	 * Retrieve data from AMASE engine
@@ -82,25 +95,24 @@ public class BPMNAMASERestClient extends HttpServlet {
 	}
 	
 	private void createNewFile(File file, String content) throws IOException{
+
 	    file.createNewFile();
 	    FileWriter fileOut = new FileWriter(file);
 	    fileOut.write(content, 0, content.length());
 	    fileOut.flush();
 	    fileOut.close();
+	    
 	}
 	
-	private void writeBPMNToJSON(String processID){
+	private void writeBPMNToJSON(String processID) throws Exception{
 		BPMNXMLtoJSONParser parser = new BPMNXMLtoJSONParser();
 	    String XMLFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
 	    String JSONFilePath = getServletContext().getRealPath("/GraphData/" + processID + ".js");
-	    try {
 			parser.parseBPMNFile(XMLFilePath, JSONFilePath);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 	}
 	
-	private HttpServletResponse writeToDom(HttpServletResponse response) throws IOException{
+	private HttpServletResponse writeToDom(HttpServletResponse response, String processID) throws IOException{
 		response.setContentType("text/html");
 	    PrintWriter out = response.getWriter();
 	    out.println(
@@ -111,11 +123,6 @@ public class BPMNAMASERestClient extends HttpServlet {
 		    "<link type=\"text/css\" rel=\"stylesheet\" href=\"CSS/stylesheet.css\"/>" +
 		  "</head>" +
 		  "<body>" +
-		    "<h1>BPMN Diagram Visualiser</h1>" +
-		    "<form action=\"\" method=\"GET\">" +
-		      "<input type=\"text\" name=\"activityName\">" +
-		      "<input type=\"submit\" name=\"submit\">" +
-		    "</form>" +
 		    "<div id=\"container\" >" +
 		      "<div id=\"myDiagramDiv\"></div>" +
 		
@@ -133,15 +140,14 @@ public class BPMNAMASERestClient extends HttpServlet {
 		        "</table>" +
 		      "</div>" +
 		    "</div>" +
-		 
+			    "<script src=\"JS/lib/go-debug.js\"></script>" +
+			    "<script src=\"GraphData/" + processID + ".js\"></script>" +
+			    "<script src=\"JS/diagram_init.js\"></script>" +
+			    "<script src=\"JS/diagram_interaction.js\"></script>" +
+			    "<script src=\"JS/data_display.js\"></script>" +
+			    "<script src=\"JS/course_interaction.js\"></script>" +
+			    "<script src=\"JS/main.js\"></script>" +
 		  "</body>" +
-		    "<script src=\"JS/lib/go-debug.js\"></script>" +
-		    "<script src=\"diagram_data/graphData.js\"></script>" +
-		    "<script src=\"JS/diagram_init.js\"></script>" +
-		    "<script src=\"JS/diagram_interaction.js\"></script>" +
-		    "<script src=\"JS/data_display.js\"></script>" +
-		    "<script src=\"JS/course_interaction.js\"></script>" +
-		    "<script src=\"JS/main.js\"></script>" +
 		"</html>"
 	    );
 	    return response;

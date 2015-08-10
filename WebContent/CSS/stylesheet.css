@@ -1,0 +1,66 @@
+#container {
+  position:absolute;
+  width: 1504px;
+  left: 20px;
+}
+
+#myDiagramDiv {
+  position: absolute;
+  width: 1500px;
+  height: 900px;
+  background-color: #DAE4E4;
+  border: 2px solid lightblue;
+}
+
+#dataDisplayContainer{
+  position: absolute;
+  top:925px;
+  width: inherit
+}
+
+#dataDisplay{
+  position: absolute;
+  width: inherit;
+  border: 2px solid lightblue;
+  table-layout: fixed;
+}
+
+#dataDisplay > tbody > tr > td {
+  padding: 10px;
+  background-color: #DAE4E4;
+  text-align: center;
+  color: #444444;
+}
+
+#dataDisplay > tbody > tr > td:first-child {
+  border-right: 2px solid lightblue;
+  font-weight: bold;
+}
+
+#nav_bar {
+  position:relative;
+  width: inherit;
+  overflow: auto;
+  background-color: lightblue;
+  position:relative;
+  top: 904px;
+}
+
+#nav_bar_contents{
+  position: relative;
+  float:left;
+  left: 10px;
+  width: initial;
+}
+
+#nav_bar_label {
+  color: #444444;
+}
+
+.nav_button {
+  /*float: left;*/
+  background-color: #DAE4E4;
+  text-align: center;
+  color: #444444;
+  border: 2px solid #8DB8C6;
+}
