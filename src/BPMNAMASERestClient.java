@@ -4,15 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.net.URI;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,6 +14,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -38,7 +36,8 @@ public class BPMNAMASERestClient extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 					    
 		
-    	String processID = request.getParameter("process");		    
+    	String processID = request.getParameter("process");
+    	String processInstanceID = request.getParameter("processInstanceID");
 	    
     	String bpmnRelativeDirectoryPath = "/BPMNData";
 	    checkForAndCreateNewDirectory(bpmnRelativeDirectoryPath);
@@ -64,7 +63,24 @@ public class BPMNAMASERestClient extends HttpServlet {
 			}
 	    }
 	    
-	    response = writeToDom(response, processID);
+	    //retrieve process state from server
+	    String processStateDataXml = retrieveProcessState(processInstanceID);
+	    
+	    //Convert process state from XML to JSON
+	    JSONObject processStateDataJson = new JSONObject();
+	    String processStateDataJsonString = "";
+	    try{
+	    	processStateDataJson = XML.toJSONObject(processStateDataXml);
+	    	processStateDataJsonString = processStateDataJson.toString();
+	    } catch(JSONException je){
+	    	System.out.println(je.toString());
+	    }
+	    
+	    //the XML data makes use of the '-' char, which is incomptible with json
+	    //therefore this is removed.
+	    processStateDataJsonString = processStateDataJson.toString().replace("-", "");
+	    
+	    response = writeToDom(response, processID, processStateDataJsonString);
 	    
 	}
 
@@ -82,6 +98,18 @@ public class BPMNAMASERestClient extends HttpServlet {
 		Client client = Client.create(config);
 		WebResource service = client.resource( uri );
     	return service.path("process-file").path(processID).get(String.class);		
+	}
+	
+	/*
+	 * Retrieve data on process state from AMAS engine
+	 */
+	private String retrieveProcessState(String processInstanceID){
+		String SERVER_LOCATION = "sweep.scss.tcd.ie";
+		URI uri = UriBuilder.fromUri("http://"+SERVER_LOCATION+"/amase.services").build();
+		ClientConfig config = new DefaultClientConfig();
+		Client client = Client.create(config);
+		WebResource service = client.resource( uri );
+    	return service.path("process-state").path(processInstanceID).get(String.class);
 	}
 	
 	/*
@@ -112,7 +140,7 @@ public class BPMNAMASERestClient extends HttpServlet {
 		
 	}
 	
-	private HttpServletResponse writeToDom(HttpServletResponse response, String processID) throws IOException{
+	private HttpServletResponse writeToDom(HttpServletResponse response, String processID, String processStateData) throws IOException{
 		response.setContentType("text/html");
 	    PrintWriter out = response.getWriter();
 	    out.println(
@@ -140,14 +168,15 @@ public class BPMNAMASERestClient extends HttpServlet {
 		        "</table>" +
 		      "</div>" +
 		    "</div>" +
-			    "<script src=\"JS/lib/go-debug.js\"></script>" +
-			    "<script src=\"GraphData/" + processID + ".js\"></script>" +
-			    "<script src=\"JS/diagram_init.js\"></script>" +
-			    "<script src=\"JS/diagram_interaction.js\"></script>" +
-			    "<script src=\"JS/data_display.js\"></script>" +
-			    "<script src=\"JS/course_interaction.js\"></script>" +
-			    "<script src=\"JS/main.js\"></script>" +
 		  "</body>" +
+		  "<script src=\"JS/lib/go-debug.js\"></script>" +
+		  "<script src=\"GraphData/" + processID + ".js\"></script>" +
+		  "<script src=\"JS/diagram_init.js\"></script>" +
+		  "<script src=\"JS/diagram_interaction.js\"></script>" +
+		  "<script src=\"JS/data_display.js\"></script>" +
+		  "<script src=\"JS/course_interaction.js\"></script>" +
+		  "<script src=\"JS/main.js\"></script>" +
+		  "<script> var processStateData =" + processStateData + ";</script>" +
 		"</html>"
 	    );
 	    return response;

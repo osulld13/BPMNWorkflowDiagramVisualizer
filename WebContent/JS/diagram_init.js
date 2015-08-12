@@ -93,7 +93,7 @@ function initDiagram(){
        isReadOnly: true,
        allowHorizontalScroll: true,
        allowVerticalScroll: true,
-       allowZoom: false,
+       allowZoom: true,
        allowSelect: false,
        maxSelectionCount: 1,
        click: selectBackground,
