@@ -27,6 +27,10 @@ import org.jbpm.workflow.core.node.Split;
 import org.jbpm.workflow.core.node.CompositeContextNode;
 import org.jbpm.workflow.core.node.EventNode;
 
+/*
+ * Writes a JSON file from a BPMN XML file
+ */
+
 public class BPMNXMLtoJSONParser {
 
 	
@@ -37,9 +41,7 @@ public class BPMNXMLtoJSONParser {
 	private static String startNodeDataString = "nodeData";
 	private static String startVariablesString = "variables";
 	private static String startConnectionsString = "connections";
-	
-	private static String bpmnFileName = "sqlcourse8.5.bpmn";
-	//private static String bpmnFileName = "java2.bpmn";
+
 	
 	private static String gatewayName = "Gateway";
 	
@@ -48,19 +50,16 @@ public class BPMNXMLtoJSONParser {
 	public BPMNXMLtoJSONParser(){
 	}
 	
+	/*
+	 * Function to parse an XML File and write it to a JSON file given the paths for each as strings
+	 */
 	public void parseBPMNFile(String XMLFilePath, String JSONFilePath) throws Exception {
+			
 		
-		//String absoluteFolderPath = getServletContext().getRealPath(relativeFolderPath);
-		
-		//Only one of these can be included
-		String processFile = XMLFilePath;		
-		
-		//FileWriter out = new FileWriter("diagram_data/graphData.js");
 		FileWriter out = new FileWriter(JSONFilePath);
-		/* 
-		 * Keeps track of the level of nesting in the file is being written to.
-		 * Tabs are added to output string accordingly
-		 */
+		 
+		// Keeps track of the level of nesting in the file is being written to.
+		// Tabs are added to output string accordingly
 		int currentNesting = 0;
 
 		// load up the knowledge base
@@ -226,6 +225,16 @@ public class BPMNXMLtoJSONParser {
 		currentNesting = closeArray(out, currentNesting);
 	}
 	
+	/*
+	 * A function that writes the sub process nodes contained within a process to the output file.
+	 * The parameters for the function are: 
+	 * 	- The RuleFlowProcess that is to be operated on.
+	 * 	- The file writer that is to be used
+	 *  - The current level of nesting being operated at
+	 * Behaviour:
+	 *  The list of nodes stored within the process is iterated over and the relevant 
+	 *  sub processes are written to the output file.
+	 */
 	private static void writeSubProcessNodesToFile(RuleFlowProcess process, CompositeContextNode subProcess, FileWriter out, int currentNesting) throws IOException{
 		
 		for (org.drools.definition.process.Node n: subProcess.getNodes()){
@@ -547,11 +556,11 @@ public class BPMNXMLtoJSONParser {
 	public static void writeInputFile(File fileIn) throws IOException{
 		FileReader in = new FileReader(fileIn);
 				
-				int x;
-				while((x = in.read()) != -1)
-					System.out.write(x);
+		int x;
+		while((x = in.read()) != -1)
+			System.out.write(x);
 				
-				in.close();
+		in.close();
 	}
 	
 }

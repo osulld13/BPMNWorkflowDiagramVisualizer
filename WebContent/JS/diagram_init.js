@@ -2,7 +2,7 @@ var G = go.GraphObject.make;
 var myDiagram;
 var myModel;
 var myLayout;
-
+var processStateData;
 /*
  * Node Types
  */
@@ -367,10 +367,12 @@ function getNodeByName(name){
 }
 
 function setProcessState(){
-  var node = getNodeByName(processStateData.taskdescriptions.taskdescription.name);
-  for(var i = 0; i < myDiagram.model.nodeDataArray.length; i ++){
-    if(myDiagram.model.nodeDataArray[i].name === node.name){
-      myDiagram.model.nodeDataArray[i].completed = true;
+  if(processStateData !== undefined){
+    var node = getNodeByName(processStateData.taskdescriptions.taskdescription.name);
+    for(var i = 0; i < myDiagram.model.nodeDataArray.length; i ++){
+      if(myDiagram.model.nodeDataArray[i].name === node.name){
+        myDiagram.model.nodeDataArray[i].completed = true;
+      }
     }
   }
 }

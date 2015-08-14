@@ -24,8 +24,9 @@ public class ProcessSelector extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	/*
+	 * Writes sends a form to the user where they  can select the diagram the wish to use
+	 * as well as define the process state they wish to use.
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
