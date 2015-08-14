@@ -213,57 +213,6 @@ function advanceToNode(nextNodeInPath){
   }
 }
 
-// function moveBackToNode(nextNodeInPath){
-//
-//
-//      //mark current node as completed
-//      makeCompleted(inProgressNode);
-//
-//      //get next node
-//      var prevNode = inProgressNode;
-//
-//      inProgressNode = nextNodeInPath;
-//
-//      //if end node of entire graph has been reached, finish course
-//      if(inProgressNode.isGroup === undefined
-//        && inProgressNode.group === undefined
-//        && inProgressNode.nodeType === nodeTypeEndNode){
-//        finishCourse();
-//        setAllNodeColors();
-//      }
-//
-//      else {
-//        //Start subprocesses if node is a subprocess
-//        if(inProgressNode.isGroup !== undefined){
-//          if(inProgressNode.isGroup){
-//            //remove the subprocess node from the frontier and initiate the subprocess
-//            removeNodeFromFrontier(inProgressNode);
-//            inProgressNode = startSubProcess(inProgressNode.key);
-//          }
-//        }
-//
-//        else if( inProgressNode.group !== undefined
-//         && inProgressNode.nodeType === nodeTypeEndNode){
-//           finishSubProcess();
-//        }
-//
-//       else if( inProgressNode.name.substring(0, 6) === nodeNameSignal){
-//         console.log("eventTrigger");
-//         triggerEvent();
-//       }
-//
-//        //if the previous node is an xor node we should remove its outgoing
-//        //connections from the frontier  except for the chosen node
-//        if(prevNode.name === nodeNameXOR){
-//          removeXOROutgoingConnectionsFromFrontier(prevNode.key, inProgressNode.key);
-//        }
-//
-//
-//        removeNodeFromFrontier(inProgressNode);
-//        addChildrenToFrontier(inProgressNode);
-//        setAllNodeColors();
-// }
-
 function isValidMove(node){
   //here we wait for all incoming connections in an and node to synchronize and
   //check that our node is not an option in a completed XOR

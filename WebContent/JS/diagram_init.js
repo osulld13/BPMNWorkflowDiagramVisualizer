@@ -366,6 +366,9 @@ function getNodeByName(name){
   }
 }
 
+
+//sets the process state in the diagram. Process state is assigned in a script embedded in
+// the webpage.
 function setProcessState(){
   if(processStateData !== undefined){
     var node = getNodeByName(processStateData.taskdescriptions.taskdescription.name);
