@@ -24,6 +24,10 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
+/*
+ * This servlet process the request from the process selection form
+ * and displays the relevant diagram with processState
+ */
 
 @WebServlet("/BPMNAMASERestClient")
 public class BPMNAMASERestClient extends HttpServlet {
@@ -35,10 +39,11 @@ public class BPMNAMASERestClient extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 					    
-		
+		//Retrieve the request parameters
     	String processID = request.getParameter("process");
     	String processInstanceID = request.getParameter("processInstanceID");
 	    
+    	//Set the directory to write to
     	String bpmnRelativeDirectoryPath = "/BPMNData";
 	    checkForAndCreateNewDirectory(bpmnRelativeDirectoryPath);
 
@@ -84,6 +89,9 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    
 	}
 
+	/*
+	 * Post requests redirect input into the doGet() method
+	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doGet(request, response);
 	}
@@ -122,8 +130,10 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    }
 	}
 	
+	/*
+	 * Creates a file with the content passed to the method
+	 */
 	private void createNewFile(File file, String content) throws IOException{
-
 	    file.createNewFile();
 	    FileWriter fileOut = new FileWriter(file);
 	    fileOut.write(content, 0, content.length());
@@ -132,14 +142,23 @@ public class BPMNAMASERestClient extends HttpServlet {
 	    
 	}
 	
+	 
+	/*
+	 * Creates a parser and converts the BPMN XML file content to JSON and writes
+	 * it to a file.
+	 */
 	private void writeBPMNToJSON(String processID) throws Exception{
 		BPMNXMLtoJSONParser parser = new BPMNXMLtoJSONParser();
 	    String XMLFilePath = getServletContext().getRealPath("/BPMNData/" + processID + ".bpmn");
 	    String JSONFilePath = getServletContext().getRealPath("/GraphData/" + processID + ".js");
-			parser.parseBPMNFile(XMLFilePath, JSONFilePath);
-		
+		parser.parseBPMNFile(XMLFilePath, JSONFilePath);
 	}
 	
+	/*
+	 * Writes HTML response for user. The paths to the relevant data file for the diagram
+	 * are dynamically generated using there processID and process state information is embedded
+	 * in the document as JSON
+	 */
 	private HttpServletResponse writeToDom(HttpServletResponse response, String processID, String processStateData) throws IOException{
 		response.setContentType("text/html");
 	    PrintWriter out = response.getWriter();
@@ -175,8 +194,8 @@ public class BPMNAMASERestClient extends HttpServlet {
 		  "<script src=\"JS/diagram_interaction.js\"></script>" +
 		  "<script src=\"JS/data_display.js\"></script>" +
 		  "<script src=\"JS/course_interaction.js\"></script>" +
-		  "<script src=\"JS/main.js\"></script>" +
 		  "<script> var processStateData =" + processStateData + ";</script>" +
+		  "<script src=\"JS/main.js\"></script>" +
 		"</html>"
 	    );
 	    return response;

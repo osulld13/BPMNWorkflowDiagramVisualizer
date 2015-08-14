@@ -72,6 +72,7 @@ function init(){
  initLayout();
  initLinkTemplate();
  generateTableData();
+ setProcessState();
  setAllNodeColors();
  initLinkColors()
 }
@@ -352,6 +353,24 @@ function getNodeByKey(num){
   for(var i = 0; i < currentProcess.nodeData.length; i++ ){
     if(currentProcess.nodeData[i].key === num){
       return currentProcess.nodeData[i];
+    }
+  }
+}
+
+//returns node with input name
+function getNodeByName(name){
+  for(var i = 0; i < currentProcess.nodeData.length; i++ ){
+    if(currentProcess.nodeData[i].name === name){
+      return currentProcess.nodeData[i];
+    }
+  }
+}
+
+function setProcessState(){
+  var node = getNodeByName(processStateData.taskdescriptions.taskdescription.name);
+  for(var i = 0; i < myDiagram.model.nodeDataArray.length; i ++){
+    if(myDiagram.model.nodeDataArray[i].name === node.name){
+      myDiagram.model.nodeDataArray[i].completed = true;
     }
   }
 }
